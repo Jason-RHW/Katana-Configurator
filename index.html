@@ -387,15 +387,140 @@
     font-weight: 300;
   }
 
-  @media (max-width: 700px) {
-    .controls { grid-template-columns: 1fr; }
-    header { padding: 28px 20px 22px; }
-    main { padding: 28px 14px 48px; }
-    .brand { font-size: 1.5rem; }
+  /* ── TABLET: keep 4 columns, just tighten gap ── */
+  @media (max-width: 900px) and (min-width: 601px) {
+    .controls { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .fitting-card { padding: 12px 12px; }
+    .fitting-name { font-size: 1.05rem; }
+    .fitting-desc { font-size: 0.7rem; }
   }
+
+  /* ── MOBILE portrait ── */
+  @media (max-width: 600px) {
+    header { padding: 16px 16px 12px; }
+    .brand { font-size: 1.25rem; letter-spacing: 0.1em; }
+    .subtitle-jp { font-size: 0.78rem; margin-top: 3px; }
+    .subtitle { font-size: 0.68rem; letter-spacing: 0.15em; }
+
+    main { padding: 12px 10px 36px; gap: 10px; }
+
+    .katana-frame { padding: 14px 8px; }
+
+    /* Zoom controls — larger tap targets, wrap if needed */
+    .zoom-controls { gap: 6px; margin-top: 6px; flex-wrap: wrap; justify-content: center; }
+    .zoom-btn { width: 40px; height: 40px; font-size: 1.2rem; }
+    .zoom-reset { width: auto; padding: 0 14px; font-size: 0.65rem; }
+    .zoom-label { font-size: 0.72rem; min-width: 42px; }
+    .download-btn { padding: 0 14px !important; font-size: 0.68rem !important; height: 40px; }
+
+    /* Section titles */
+    .section-title { margin-bottom: 6px; }
+    .section-title-en { font-size: 0.62rem; }
+    .section-title-jp { font-size: 0.9rem; }
+
+    /* Cards — 2x2 grid on mobile */
+    .controls { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .fitting-card { padding: 10px 12px; }
+    .fitting-name { font-size: 1rem; }
+    .fitting-jp { font-size: 0.9rem; }
+    .fitting-desc { font-size: 0.7rem; margin: 4px 0 8px; min-height: unset; }
+
+    /* Dropdown — larger tap targets */
+    .color-select-trigger { padding: 9px 10px; }
+    .trigger-swatch { width: 18px; height: 18px; }
+    .trigger-name { font-size: 0.78rem; }
+    .dropdown-option { padding: 10px 10px; }
+    .option-swatch { width: 16px; height: 16px; }
+    .option-name { font-size: 0.78rem; }
+    .color-dropdown { max-height: 160px; }
+
+    /* Reset button */
+    .reset-btn { padding: 6px 10px; font-size: 0.62rem; margin-top: 6px; }
+
+    footer { padding: 14px 12px; font-size: 0.58rem; letter-spacing: 0.15em; }
+  }
+  /* ── PORTRAIT ORIENTATION OVERLAY ── */
+  .portrait-notice {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--sumi);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px 32px;
+    text-align: center;
+  }
+  .portrait-notice.visible { display: flex; }
+  .portrait-icon {
+    font-size: 3.5rem;
+    animation: rotate-hint 2s ease-in-out infinite;
+  }
+  @keyframes rotate-hint {
+    0%   { transform: rotate(0deg); }
+    30%  { transform: rotate(90deg); }
+    70%  { transform: rotate(90deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .portrait-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--washi);
+    letter-spacing: 0.08em;
+  }
+  .portrait-sub {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.78rem;
+    font-weight: 300;
+    color: rgba(242,237,230,0.55);
+    letter-spacing: 0.12em;
+    line-height: 1.7;
+  }
+  .portrait-dismiss {
+    margin-top: 8px;
+    background: none;
+    border: 1px solid rgba(242,237,230,0.25);
+    color: rgba(242,237,230,0.45);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .portrait-dismiss:hover { border-color: var(--aka); color: var(--aka); }
+
 </style>
+<script>
+// ── ANALYTICS HELPER ─────────────────────────────────────────────────────────
+// Works with Vercel Web Analytics (window.va) and gracefully does nothing locally
+function track(eventName) {
+  try {
+    if (window.va) {
+      window.va('event', { name: eventName });
+    }
+    console.log('[Analytics]', eventName);
+  } catch(e) {}
+}
+</script>
 </head>
 <body>
+
+<!-- Portrait orientation notice -->
+<div class="portrait-notice" id="portrait-notice">
+  <div class="portrait-icon">📱</div>
+  <div class="portrait-title">Rotate Your Phone</div>
+  <div class="portrait-sub">
+    For the best experience,<br>please turn your phone horizontally.<br><br>
+    横向きにすると<br>より見やすくなります。
+  </div>
+  <button class="portrait-dismiss" onclick="dismissPortrait()">Continue Anyway</button>
+</div>
 
 <header>
   <div class="brand">Katana Configurator</div>
@@ -1488,6 +1613,7 @@ function zoomIn() {
   zoomLevel = Math.min(ZOOM_MAX, +(zoomLevel + ZOOM_STEP).toFixed(2));
   clampPan();
   applyTransform(true);
+  track('zoom_in');
 }
 
 function zoomOut() {
@@ -1495,11 +1621,13 @@ function zoomOut() {
   if (zoomLevel === ZOOM_MIN) { panX = 0; panY = 0; }
   else clampPan();
   applyTransform(true);
+  track('zoom_out');
 }
 
 function zoomReset() {
   zoomLevel = 1; panX = 0; panY = 0;
   applyTransform(true);
+  track('zoom_reset');
 }
 
 // Mouse wheel zoom
@@ -1554,6 +1682,7 @@ function downloadKatana() {
   const btn = document.querySelector('.download-btn');
   btn.textContent = 'Saving...';
   btn.disabled = true;
+  track('save_image');
 
   const svgEl = document.getElementById('katana-svg').querySelector('svg');
   const vb = svgEl.viewBox.baseVal;
@@ -1644,7 +1773,36 @@ function selectColor(key, hex, name) {
   // Close dropdown
   document.getElementById('palette-' + key).classList.remove('open');
   document.getElementById('trigger-' + key).classList.remove('open');
+  // Track color selection
+  // Encode as: fitting_colorname (lowercase, spaces to underscores)
+  const eventName = key + '_' + name.toLowerCase().replace(/\s+/g, '_');
+  track(eventName);
 }
+
+// ── PORTRAIT ORIENTATION NOTICE ─────────────────────────────────────────────
+let portraitDismissed = false;
+
+function checkOrientation() {
+  if (portraitDismissed) return;
+  const isMobile = window.innerWidth <= 600;
+  const isPortrait = window.innerHeight > window.innerWidth;
+  const notice = document.getElementById('portrait-notice');
+  if (isMobile && isPortrait) {
+    notice.classList.add('visible');
+  } else {
+    notice.classList.remove('visible');
+  }
+}
+
+function dismissPortrait() {
+  portraitDismissed = true;
+  document.getElementById('portrait-notice').classList.remove('visible');
+}
+
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', () => {
+  setTimeout(checkOrientation, 100); // slight delay for orientation to settle
+});
 
 function initUI() {
   Object.keys(FITTINGS).forEach(key => {
@@ -1668,6 +1826,47 @@ function initUI() {
 }
 
 initUI();
+checkOrientation();
+
+// ── SESSION TIME TRACKING ─────────────────────────────────────────────────────
+const sessionStart = Date.now();
+
+function getSessionSeconds() {
+  return Math.round((Date.now() - sessionStart) / 1000);
+}
+
+function formatDuration(sec) {
+  if (sec < 60) return sec + 's';
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return m + 'm ' + s + 's';
+}
+
+// Fire when user leaves the page (close tab, navigate away, refresh)
+window.addEventListener('beforeunload', () => {
+  track('session_end');
+});
+
+// Also fire at 30s, 1min, 3min, 5min milestones — useful if beforeunload is blocked
+// (some mobile browsers don't reliably fire beforeunload)
+// Milestone event names: session_30s, session_1min, session_3min, session_5min
+const milestones = [
+  { sec: 30,  name: 'session_30s' },
+  { sec: 60,  name: 'session_1min' },
+  { sec: 180, name: 'session_3min' },
+  { sec: 300, name: 'session_5min' }
+];
+milestones.forEach(m => {
+  setTimeout(() => { track(m.name); }, m.sec * 1000);
+});
+
+// Visibility change — track when user switches tabs or backgrounds the app
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    track('session_paused');
+  } else {
+    track('session_resumed');
+  }
+});
 </script>
 </body>
 </html>
