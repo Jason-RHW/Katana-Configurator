@@ -1815,7 +1815,7 @@ const FITTINGS = {
     groupId: 'g266',
     default: '#fad993',
     colors: [
-      {name:'Gold',hex:'#fad993'},
+      {name:'Brass',hex:'#fad993'},
       {name:'Silver',hex:'#aeafae'}
     ]
   },
@@ -1823,7 +1823,7 @@ const FITTINGS = {
     groupId: 'g315',
     default: '#fad993',
     colors: [
-      {name:'Gold',hex:'#fad993'},
+      {name:'Brass',hex:'#fad993'},
       {name:'Silver',hex:'#aeafae'}
     ]
   },
@@ -1831,7 +1831,7 @@ const FITTINGS = {
     groupId: 'g291,g294',
     default: '#c49a66',
     colors: [
-      {name:'Bronze',hex:'#c49a66'},
+      {name:'Brass',hex:'#c49a66'},
       {name:'Silver',hex:'#aeafae'}
     ]
   },
@@ -1839,7 +1839,7 @@ const FITTINGS = {
     groupId: 'g288',
     default: '#c49a66',
     colors: [
-      {name:'Bronze',hex:'#c49a66'},
+      {name:'Brass',hex:'#c49a66'},
       {name:'Silver',hex:'#aeafae'}
     ]
   }
@@ -2242,6 +2242,13 @@ selectHamon(null, 'None'); // reset hamon to default on every new session
 checkOrientation();
 
 // ── SESSION TIME TRACKING ─────────────────────────────────────────────────────
+
+// ── UTM SOURCE TRACKING ──────────────────────────────────────────────────────
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const source = params.get('utm_source');
+  if (source) track('visit_' + source);
+})();
 const sessionStart = Date.now();
 
 function getSessionSeconds() {
