@@ -2247,7 +2247,10 @@ checkOrientation();
 (function() {
   const params = new URLSearchParams(window.location.search);
   const source = params.get('utm_source');
-  if (source) track('visit_' + source);
+  if (source) {
+    // Delay to ensure Vercel Analytics script has loaded
+    setTimeout(() => track('visit_' + source), 1500);
+  }
 })();
 const sessionStart = Date.now();
 
