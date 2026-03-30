@@ -610,10 +610,12 @@
 // Works with Vercel Web Analytics (window.va) and gracefully does nothing locally
 function track(eventName) {
   try {
+    const source = sessionStorage.getItem('utm_source');
+    const name = source ? source + '_' + eventName : eventName;
     if (window.va) {
-      window.va('event', { name: eventName });
+      window.va('event', { name: name });
     }
-    console.log('[Analytics]', eventName);
+    console.log('[Analytics]', name);
   } catch(e) {}
 }
 </script>
@@ -2247,16 +2249,20 @@ checkOrientation();
 (function() {
   const params = new URLSearchParams(window.location.search);
   const source = params.get('utm_source');
-  if (!source) return;
-  // Poll until window.va is available (Vercel Analytics loads async)
+  if (source) sessionStorage.setItem('utm_source', source);
+
+  const storedSource = sessionStorage.getItem('utm_source');
+  if (!storedSource) return;
+
+  // Poll until window.va is available
   let attempts = 0;
   const interval = setInterval(() => {
     attempts++;
     if (window.va) {
-      window.va('event', { name: 'visit_' + source });
+      window.va('event', { name: 'visit_' + storedSource });
       clearInterval(interval);
     } else if (attempts > 20) {
-      clearInterval(interval); // give up after 10s
+      clearInterval(interval);
     }
   }, 500);
 })();
