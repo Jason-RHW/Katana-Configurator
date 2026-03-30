@@ -2247,10 +2247,18 @@ checkOrientation();
 (function() {
   const params = new URLSearchParams(window.location.search);
   const source = params.get('utm_source');
-  if (source) {
-    // Delay to ensure Vercel Analytics script has loaded
-    setTimeout(() => track('visit_' + source), 1500);
-  }
+  if (!source) return;
+  // Poll until window.va is available (Vercel Analytics loads async)
+  let attempts = 0;
+  const interval = setInterval(() => {
+    attempts++;
+    if (window.va) {
+      window.va('event', { name: 'visit_' + source });
+      clearInterval(interval);
+    } else if (attempts > 20) {
+      clearInterval(interval); // give up after 10s
+    }
+  }, 500);
 })();
 const sessionStart = Date.now();
 
