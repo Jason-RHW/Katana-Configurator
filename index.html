@@ -612,12 +612,30 @@ function track(eventName) {
   try {
     const source = sessionStorage.getItem('utm_source');
     const name = source ? source + '_' + eventName : eventName;
+
+    // Vercel Analytics
     if (window.va) {
       window.va('event', { name: name });
     }
+
+    // Google Analytics
+    if (window.gtag) {
+      gtag('event', name, {
+        utm_source: source || 'direct'
+      });
+    }
+
     console.log('[Analytics]', name);
   } catch(e) {}
 }
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N645KKS37M"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-N645KKS37M');
 </script>
 </head>
 <body>
